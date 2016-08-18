@@ -20,6 +20,7 @@
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
     "gulp-eslint": "^3.0.1",
+    "gulp-nodemon": "^2.1.0",
     "gulp-sourcemaps": "^1.6.0",
     "nodemon": "^1.10.0",
     "npm-run-all": "^3.0.0",
