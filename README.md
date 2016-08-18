@@ -1,22 +1,36 @@
-# ES2015 with npm (instead of Grunt/Gulp)
+# ES2015 (ES6) Development Workflows
 
 ## Compilation
 
+ - **eslint**: ES5/ES6 pattern checker
+ - **babel**: ES6 to readable ES5
+
 ```sh
-npm install --save-dev watch eslint babel-cli babel-preset-es2015
+npm install --save-dev eslint 
+npm install --save-dev babel-cli babel-preset-es2015
 ```
 
-Add entry to `package.json`:
+Other useful libraries:
+
+ - **rimraf**: cross-platform `rm -rf`.
+ - **npm-run-all**: great tool to run npm tasks in parallel or sequential
+ - **nodemon**: monitor script of a Node app
+
+```sh
+npm install --save-dev rimraf npm-run-all nodemon
+```
+
+Add `scripts` entries (`package.json`):
 
 ```json
-"scripts": {
-    "start": "node build/app.js",
-    "clean": "rm -rf build",
+  "scripts": {
+    "clean": "rimraf build",
     "eslint": "eslint src",
     "babel": "babel src --presets es2015 --source-maps -d build",
-    "compile": "npm run clean && npm run eslint && npm run babel",
-    "watch": "watch --interval=1 'npm run compile && npm run start' src"
-},
+    "prestart": "run-s clean babel",
+    "start": "nodemon --watch build build/app.js",
+    "watch": "run-p 'babel -- --watch' start"
+  },
 ```
 
 ## Source Map support
@@ -25,7 +39,7 @@ Add entry to `package.json`:
 npm install --save source-map-support
 ```
 
-Import this module below from the entry point `src/app.js`:
+Import this from the entry point `src/app.js`:
 
 ```js
 import 'source-map-support/register';
@@ -33,4 +47,4 @@ import 'source-map-support/register';
 ...
 ```
 
-and just run `npm run watch`.
+Then run `npm run watch`.
