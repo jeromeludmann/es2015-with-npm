@@ -6,7 +6,8 @@ const message = hello.getMessage();
 
 try {
   console.log(message);
-  hello.throwException();
+  // hello.throwException();
+
 
 } catch (exception) {
   console.log(exception);

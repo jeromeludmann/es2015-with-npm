@@ -3,12 +3,11 @@
   "version": "1.0.0",
   "description": "ES2015 (ES6) Development Workflows",
   "scripts": {
+    "lint": "eslint src",
     "clean": "rimraf build",
-    "eslint": "eslint src",
-    "babel": "babel src --presets es2015 --source-maps -d build",
-    "prestart": "run-s clean babel",
-    "start": "nodemon --watch build build/app.js",
-    "watch": "run-p 'babel -- --watch' start"
+    "build": "babel src --presets es2015 --source-maps -d build",
+    "start": "node build/app.js",
+    "dev": "nodemon --watch src -e js --exec 'npm-run-all -l -p lint clean -s build start'"
   },
   "author": "Jérôme Ludmann",
   "license": "UNLICENSED",

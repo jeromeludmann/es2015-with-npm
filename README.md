@@ -1,39 +1,51 @@
 # ES2015 (ES6) Development Workflows
 
+For npm and gulp.
 
 ## Using `npm` only
+
+There are two great magical tools: 
+
+```sh
+npm install --save-dev nodemon
+npm install --save-dev npm-run-all
+```
+
+ - **[**npm-run-all**](https://github.com/mysticatea/npm-run-all)** runs multiple scripts in parallel or sequential
+ - **[**nodemon**](https://github.com/remy/nodemon)** monitors for any changes (like `gulp.watch()`)
+
 
 ```sh
 npm install --save-dev eslint 
 npm install --save-dev babel-cli babel-preset-es2015
 ```
 
- - **eslint** is an ES5/ES6 pattern checker
- - **babel** compile ES6 code to readable ES5
-
-Other useful libraries:
+ - **eslint** checks JavaScript code style 
+ - **babel-cli** - _the babel command-line tool_ - compiles ES6 code to readable ES5 JavaScript
 
 ```sh
-npm install --save-dev rimraf npm-run-all nodemon
+npm install --save-dev rimraf
 ```
 
  - **rimraf** is a cross-platform `rm -rf`
- - **npm-run-all** helps to run npm tasks in parallel or sequential
- - **nodemon** monitors a Node application
  
-Add `scripts` entries (`package.json`):
+Add `scripts` entries to your `package.json`:
 
 ```json
-  "scripts": {
+ "scripts": {
+    "lint": "eslint src",
     "clean": "rimraf build",
-    "eslint": "eslint src",
-    "babel": "babel src --presets es2015 --source-maps -d build",
-    "prestart": "run-s clean babel",
-    "start": "nodemon --watch build build/app.js",
-    "watch": "run-p 'babel -- --watch' start"
+    "build": "babel src --presets es2015 --source-maps -d build",
+    "start": "node build/app.js",
+    "dev": "nodemon --watch src -e js --exec 'npm-run-all -l -p lint clean -s build start'"
   },
 ```
 
+Now just run `dev` task to work with.
+
+```sh
+npm run dev
+```
 
 ## Using Gulp
 
