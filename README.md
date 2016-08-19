@@ -2,17 +2,19 @@
 
 For npm and gulp.
 
+_Using npm instead of gulp allows to avoid adding complexity about multiple APIs._ 
+
 ## Using `npm` only
 
 There are two great magical tools: 
 
 ```sh
-npm install --save-dev nodemon
 npm install --save-dev npm-run-all
+npm install --save-dev nodemon
 ```
 
- - **[**npm-run-all**](https://github.com/mysticatea/npm-run-all)** runs multiple scripts in parallel or sequential
- - **[**nodemon**](https://github.com/remy/nodemon)** monitors for any changes (like `gulp.watch()`)
+ - **[npm-run-all](https://github.com/mysticatea/npm-run-all)** runs multiple scripts in parallel or sequential
+ - **[nodemon](https://github.com/remy/nodemon)** monitors for any changes (like `gulp.watch()`)
 
 
 ```sh
@@ -29,7 +31,7 @@ npm install --save-dev rimraf
 
  - **rimraf** is a cross-platform `rm -rf`
  
-Add `scripts` entries to your `package.json`:
+Script entries into `package.json`:
 
 ```json
  "scripts": {
@@ -41,12 +43,13 @@ Add `scripts` entries to your `package.json`:
   },
 ```
 
-Now just run `dev` task to work with.
+About `dev` task, nodemon watches `src` directory for any changes and runs:
 
-```sh
-npm run dev
-```
-
+ 1. `lint` and `clean` in parallel
+ 2. `build`
+ 3. `start`
+ 
+ 
 ## Using Gulp
 
 Setting up:
