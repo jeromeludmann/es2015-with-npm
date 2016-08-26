@@ -1,4 +1,4 @@
-# npm workflow for front-end and back-end development
+# npm workflow for back-end development
 
 [tslint](https://github.com/palantir/tslint) checks TypeScript code style:
 
