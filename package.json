@@ -1,7 +1,7 @@
 {
-  "name": "dev-workflow",
-  "version": "1.2.0",
-  "description": "Workflow for front-end/back-end development",
+  "name": "npm-workflow",
+  "version": "1.2.1",
+  "description": "npm workflow for front-end and back-end development",
   "scripts": {
     "clean": "rimraf build",
     "lint": "tslint src/**/*.ts",
