@@ -3,6 +3,12 @@
     "es2015"
   ],
   "plugins": [
-    "transform-runtime"
+    [
+      "transform-runtime",
+      {
+        "polyfill": false,
+        "regenerator": true
+      }
+    ]
   ]
 }
