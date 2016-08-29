@@ -1,23 +1,19 @@
-# npm workflow for back-end development
+npm-workflow
+============
 
-## TypeScript
+Below is my TypeScript-oriented build workflow using `npm`, without Grunt or Gulp, for front and back-end JavaScript development.
 
-Dependencies:
+TypeScript as a superset of JavaScript
+--------------------------------------
+
+Install TypeScript compiler and linter:
 
 ```sh
 npm install --save-dev typescript
 npm install --save-dev tslint
-./node_modules/.bin/tslint --init
 ```
 
-If we have third-party JavaScript to include:
- 
- ```sh
- npm install --save-dev eslint
- ./node_modules/.bin/eslint --init
- ```
-
-`tsconfig.json`:
+Configure `tsconfig.json`:
 
 ```json
 {
@@ -38,59 +34,78 @@ If we have third-party JavaScript to include:
 }
 ```
 
-See also `tslint.json` and `.eslintrc.json`.
+Initialize `tslint.json`:
 
-`package.json`:
+```sh
+./node_modules/.bin/tslint --init
+```
+
+Add to `package.json`:
 
 ```json
 "scripts": {
-  "lint:ts": "tslint src/**/*.ts",
   "lint:js": "eslint src/**/*.js",
   "tsc": "tsc --rootDir src --sourceMap --outDir build/.es6",
 }
 ```
 
-## ES2015 (ES6) to ES5 JavaScript
+ES2015 (ES6) to ES5 JavaScript
+------------------------------
 
-Dependencies:
+Install Babel and ESLint:
 
 ```sh
-npm install --save-dev babel-cli
-npm install --save-dev babel-preset-es2015
-npm install --save-dev babel-plugin-transform-runtime
+npm install --save-dev babel-cli babel-preset-es2015 babel-plugin-transform-runtime
+npm install --save-dev eslint
 ```
 
 - `babel-preset-es2015` enables all ES2015 (ES6) features
-- `babel-plugin-transform-runtime` externalizes some helpers for ES7 features (like `async/await`)
+- `babel-plugin-transform-runtime` externalizes some helpers for ES7 features (like `async`)
 
-`package.json`:
+Initialize `.eslintrc.json`:
+
+```sh
+./node_modules/.bin/eslint --init
+```
+
+Add to `package.json`:
 
 ```json
 "scripts": {
+  "lint:js": "eslint src/**/*.js",
   "babel": "babel build/.es6 --source-maps --out-dir build/.es5",
 }
 ```
 
+Bundling dependencies (browser-side)
+------------------------------------
 
-## Source Map support
-
-Dependencies:
+Install Browserify and UglifyJS:
 
 ```sh
-npm install --save source-map-support
+npm install --save-dev browserify exorcist
+npm install --save-dev uglifyjs
+```
+
+- `exorcist` gets the Source Map from Browserify stream 
+
+Add to `package.json`:
+
+```json
+"scripts": {
+}
+```
+
+Multi-level Source Map
+----------------------
+
+```sh
 npm install --save-dev sorcery
 ```
 
-- `source-map-support` adds Source Map support for Node stack traces
-- `sorcery` resolves a chain of Source Maps
+- `sorcery` generates Source Maps by resolving a chain of Source Maps
 
-At the top of the entry point `src/app.js`:
-
-```js
-import "source-map-support/register";
-```
-
-`package.json`:
+Add to `package.json`:
 
 ```json
 "scripts": {
@@ -98,9 +113,29 @@ import "source-map-support/register";
 }
 ```
 
-## Automate the workflow
+Source Map support
+------------------
 
-Dependencies:
+### Node-side support
+
+```sh
+npm install --save source-map-support
+```
+
+Add at the top of the entry point `src/app.js`:
+
+```js
+import "source-map-support/register";
+```
+
+### Browser-side support
+
+Open _Developer Tools_ from browser menu. 
+
+Make these things work together
+-------------------------------
+
+Install command-line tools:
 
 ```sh
 npm install --save-dev npm-run-all
@@ -122,9 +157,9 @@ npm install --save-dev rimraf
   }
 ```
 
----
+## Finally
 
-Finally, `package.json` looks like:
+`package.json` looks like:
 
 ```json
   "scripts": {
