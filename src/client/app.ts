@@ -1,6 +1,3 @@
-// Source Map support for Node stack traces
-import "source-map-support/register";
-
 // Standard usage of TypeScript
 import {ExampleImpl} from "./core/ExampleImpl";
 const ex = new ExampleImpl("Hello World");
@@ -26,3 +23,6 @@ async function es7() {
     console.log(value);
 }
 es7();
+
+// Checking Source Map support
+throw new Error("exception from client");

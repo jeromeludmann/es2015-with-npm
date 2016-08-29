@@ -93,6 +93,8 @@ Add to `package.json`:
 
 ```json
 "scripts": {
+  "browserify": "browserify build/.es5/app.js --debug | exorcist build/bundle.js.map --base build > build/bundle.js",
+  "uglify": "uglifyjs build/bundle.js --compress --mangle --source-map build/bundle.min.js.map --prefix relative --output build/bundle.min.js",
 }
 ```
 
@@ -164,13 +166,28 @@ npm install --save-dev rimraf
 ```json
   "scripts": {
     "clean": "rimraf build",
-    "lint:ts": "tslint src/**/*.ts",
-    "lint:js": "eslint src/**/*.js",
-    "tsc": "tsc --rootDir src --sourceMap --outDir build/.es6",
-    "babel": "babel build/.es6 --source-maps --out-dir build/.es5",
-    "sorcery": "sorcery --input build/.es5 --output build/bundle",
-    "start": "node build/bundle/app.js",
-    "build": "npm-run-all --parallel lint:* --sequential tsc babel sorcery",
-    "watch": "nodemon --watch src --ext ts,js --exec 'npm-run-all --sequential build start'"
+    "server:lint:ts": "tslint src/server/**/*.ts",
+    "server:lint:js": "eslint src/server/**/*.js",
+    "server:tsc": "tsc --project src/server --sourceMap --outDir build/server/.es6",
+    "server:babel": "babel build/server/.es6 --source-maps --out-dir build/server/.es5",
+    "server:sorcery": "sorcery --input build/server/.es5 --output build/server",
+    "server:start": "node build/server/app.js",
+    "server:build": "npm-run-all --parallel server:lint:* --sequential server:tsc server:babel server:sorcery",
+    "postserver:build": "rm -rf build/server/.es*",
+    "server:watch": "nodemon --watch src/server --ext ts,js --exec 'npm-run-all --sequential server:build server:start'",
+    "client:lint:ts": "tslint src/client/**/*.ts",
+    "client:lint:js": "eslint src/client/**/*.js",
+    "client:tsc": "tsc --project src/client --sourceMap --outDir build/client/.es6",
+    "client:babel": "babel build/client/.es6 --source-maps --out-dir build/client/.es5",
+    "client:browserify": "browserify build/client/.es5/app.js --debug | exorcist build/client/bundle.js.map --base build/client > build/client/bundle.js",
+    "client:uglify": "uglifyjs build/client/bundle.js --compress --mangle --source-map build/client/bundle.min.js.map --prefix relative --output build/client/bundle.min.js",
+    "client:sorcery": "sorcery --input build/client/bundle.min.js --output build/client/bundle.min.js",
+    "client:copy": "cp src/client/public/*.html build/client",
+    "client:start": "http-server build/client",
+    "client:build": "npm-run-all --parallel client:lint:* --sequential client:tsc client:babel client:browserify client:uglify client:sorcery client:copy",
+    "postclient:build": "rm -rf build/client/.es* bundle.js*",
+    "client:watch": "nodemon --watch src/client --ext ts,js,html --exec 'npm-run-all --sequential client:build client:start'",
+    "build": "npm-run-all --parallel server:build client:build",
+    "watch": "npm-run-all --parallel server:watch client:watch"
   }
 ```
