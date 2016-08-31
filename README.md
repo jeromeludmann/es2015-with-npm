@@ -62,6 +62,25 @@ npm install --save-dev eslint
 - `babel-preset-es2015` enables all ES2015 (ES6) features
 - `babel-plugin-transform-runtime` externalizes some helpers for ES7 features (like `async`)
 
+Add to `.babelrc`:
+
+```json
+{
+  "presets": [
+    "es2015"
+  ],
+  "plugins": [
+    [
+      "transform-runtime",
+      {
+        "polyfill": false,
+        "regenerator": true
+      }
+    ]
+  ]
+}
+```
+
 Initialize `.eslintrc.json`:
 
 ```sh
