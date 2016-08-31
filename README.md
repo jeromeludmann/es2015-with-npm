@@ -1,7 +1,7 @@
 npm-workflow
 ============
 
-Below is my TypeScript-oriented build workflow using `npm`, without Grunt or Gulp, for front and back-end JavaScript development.
+Below is a TypeScript-oriented build workflow using `npm`, without Grunt or Gulp, for front and back-end JavaScript development.
 
 TypeScript as a superset of JavaScript
 --------------------------------------
@@ -44,8 +44,10 @@ Add to `package.json`:
 
 ```json
 "scripts": {
-  "lint:js": "eslint src/**/*.js",
-  "tsc": "tsc --rootDir src --sourceMap --outDir build/.es6",
+  "server:lint:ts": "tslint src/server/**/*.ts",
+  "server:tsc": "tsc --project src/server --rootDir src --sourceMap --outDir build/.tmp/server/es6",
+  "client:lint:ts": "tslint src/client/**/*.ts",
+  "client:tsc": "tsc --project src/client --rootDir src --sourceMap --outDir build/.tmp/client/es6",
 }
 ```
 
@@ -91,8 +93,10 @@ Add to `package.json`:
 
 ```json
 "scripts": {
-  "lint:js": "eslint src/**/*.js",
-  "babel": "babel build/.es6 --source-maps --out-dir build/.es5",
+  "server:lint:js": "eslint src/server/**/*.js",
+  "server:babel": "babel build/.tmp/server/es6 --source-maps --out-dir build/.tmp/server/es5",
+  "client:lint:js": "eslint src/client/**/*.js",
+  "client:babel": "babel build/.tmp/client/es6 --source-maps --out-dir build/.tmp/client/es5",
 }
 ```
 
@@ -112,8 +116,8 @@ Add to `package.json`:
 
 ```json
 "scripts": {
-  "browserify": "browserify build/.es5/app.js --debug | exorcist build/bundle.js.map --base build > build/bundle.js",
-  "uglify": "uglifyjs build/bundle.js --compress --mangle --source-map build/bundle.min.js.map --prefix relative --output build/bundle.min.js",
+  "client:browserify": "browserify build/.tmp/client/es5/client/app.js --debug | exorcist build/.tmp/client/bundle.js.map --base build/.tmp/client > build/.tmp/client/bundle.js",
+  "client:uglify": "uglifyjs build/.tmp/client/bundle.js --compress --mangle --source-map build/.tmp/client/bundle.min.js.map --prefix relative --output build/.tmp/client/bundle.min.js",
 }
 ```
 
@@ -130,7 +134,8 @@ Add to `package.json`:
 
 ```json
 "scripts": {
-  "sorcery": "sorcery --input build/.es5 --output build/bundle",
+  "server:sorcery": "sorcery --input build/.tmp/server/es5 --output build/server-dist",
+  "client:sorcery": "sorcery --input build/.tmp/client/bundle.min.js --output build/client-dist/bundle.min.js",
 }
 ```
 
@@ -143,10 +148,12 @@ Source Map support
 npm install --save source-map-support
 ```
 
-Add at the top of the entry point `src/app.js`:
+Add `--require source-map-support/register` to node arguments:
 
-```js
-import "source-map-support/register";
+```json
+"scripts": {
+  "server:start": "node --require source-map-support/register build/server-dist/server/app.js",
+}
 ```
 
 ### Browser-side support
@@ -173,7 +180,11 @@ npm install --save-dev rimraf
 ```json
   "scripts": {
     "clean": "rimraf build",
-    "build": "npm-run-all --parallel lint:* --sequential tsc babel sorcery",
+    "server:build": "npm-run-all --parallel server:lint:* server:mocha --sequential server:tsc server:babel server:sorcery",
+    "server:watch": "nodemon --watch src/server --ext ts,js --exec 'npm-run-all --sequential server:build server:start'",
+    "client:build": "npm-run-all --parallel client:lint:* client:mocha --sequential client:tsc client:babel client:browserify client:uglify client:sorcery client:copy",
+    "client:watch": "nodemon --watch src/client --ext ts,js,html --exec 'npm-run-all --sequential client:build client:start'",
+    "build": "npm-run-all --parallel server:build client:build",
     "watch": "nodemon --watch src --ext ts,js --exec 'npm-run-all --sequential build start'"
   }
 ```
@@ -187,14 +198,16 @@ npm install --save-dev rimraf
     "clean": "rimraf build",
     "server:lint:ts": "tslint src/server/**/*.ts",
     "server:lint:js": "eslint src/server/**/*.js",
+    "server:mocha": "mocha --require ts-node/register test/*.test.ts",
     "server:tsc": "tsc --project src/server --rootDir src --sourceMap --outDir build/.tmp/server/es6",
     "server:babel": "babel build/.tmp/server/es6 --source-maps --out-dir build/.tmp/server/es5",
     "server:sorcery": "sorcery --input build/.tmp/server/es5 --output build/server-dist",
-    "server:start": "node build/server-dist/server/app.js",
-    "server:build": "npm-run-all --parallel server:lint:* --sequential server:tsc server:babel server:sorcery",
+    "server:start": "node --require source-map-support/register build/server-dist/server/app.js",
+    "server:build": "npm-run-all --parallel server:lint:* server:mocha --sequential server:tsc server:babel server:sorcery",
     "server:watch": "nodemon --watch src/server --ext ts,js --exec 'npm-run-all --sequential server:build server:start'",
     "client:lint:ts": "tslint src/client/**/*.ts",
     "client:lint:js": "eslint src/client/**/*.js",
+    "client:mocha": "mocha --require ts-node/register test/*.test.ts",
     "client:tsc": "tsc --project src/client --rootDir src --sourceMap --outDir build/.tmp/client/es6",
     "client:babel": "babel build/.tmp/client/es6 --source-maps --out-dir build/.tmp/client/es5",
     "client:browserify": "browserify build/.tmp/client/es5/client/app.js --debug | exorcist build/.tmp/client/bundle.js.map --base build/.tmp/client > build/.tmp/client/bundle.js",
@@ -202,7 +215,7 @@ npm install --save-dev rimraf
     "client:sorcery": "sorcery --input build/.tmp/client/bundle.min.js --output build/client-dist/bundle.min.js",
     "client:copy": "cp src/client/public/*.html build/client-dist",
     "client:start": "http-server build/client-dist",
-    "client:build": "npm-run-all --parallel client:lint:* --sequential client:tsc client:babel client:browserify client:uglify client:sorcery client:copy",
+    "client:build": "npm-run-all --parallel client:lint:* client:mocha --sequential client:tsc client:babel client:browserify client:uglify client:sorcery client:copy",
     "client:watch": "nodemon --watch src/client --ext ts,js,html --exec 'npm-run-all --sequential client:build client:start'",
     "build": "npm-run-all --parallel server:build client:build",
     "watch": "npm-run-all --parallel server:watch client:watch"
