@@ -10,7 +10,7 @@
     "server:tsc": "tsc --project src/server --rootDir src --sourceMap --outDir build/.tmp/server/es6",
     "server:babel": "babel build/.tmp/server/es6 --source-maps --out-dir build/.tmp/server/es5",
     "server:sorcery": "sorcery --input build/.tmp/server/es5 --output build/server-dist",
-    "server:start": "node build/server-dist/server/app.js",
+    "server:start": "node --require source-map-support/register build/server-dist/server/app.js",
     "server:build": "npm-run-all --parallel server:lint:* server:mocha --sequential server:tsc server:babel server:sorcery",
     "server:watch": "nodemon --watch src/server --ext ts,js --exec 'npm-run-all --sequential server:build server:start'",
     "client:lint:ts": "tslint src/client/**/*.ts",
