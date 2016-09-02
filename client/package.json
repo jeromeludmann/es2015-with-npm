@@ -16,8 +16,9 @@
     "build:sorcery": "sorcery --input build/bundle.min.js",
     "build:html": "mkdir -p build && cp -r src/public/* build",
     "build": "npm-run-all --sequential build:tsc build:babel build:browserify build:uglify build:sorcery build:html",
+    "postbuild": "rimraf build/.tmp",
     "start": "http-server -p 8080 build",
-    "watch": "nodemon --watch src --ext ts,js --exec 'npm-run-all --parallel test lint --sequential clean build'"
+    "watch": "nodemon --watch src --ext ts,js --exec 'npm-run-all --parallel test lint --sequential clean build start'"
   },
   "keywords": [],
   "author": "",
