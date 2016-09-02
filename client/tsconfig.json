@@ -5,12 +5,11 @@
     "target": "es6",
     "noImplicitAny": false,
     "sourceMap": true,
-    "listFiles": true,
-    "pretty": true,
     "allowJs": true
   },
   "exclude": [
     "node_modules",
-    "build"
+    "build",
+    "test"
   ]
 }

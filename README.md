@@ -44,10 +44,8 @@ Add to `package.json`:
 
 ```json
 "scripts": {
-  "server:lint:ts": "tslint src/server/**/*.ts",
-  "server:tsc": "tsc --project src/server --rootDir src --sourceMap --outDir build/.tmp/server/es6",
-  "client:lint:ts": "tslint src/client/**/*.ts",
-  "client:tsc": "tsc --project src/client --rootDir src --sourceMap --outDir build/.tmp/client/es6",
+  "lint:tslint": "tslint $(find src -name '*.ts')",
+  "build:tsc": "tsc --rootDir src --sourceMap --outDir build/.tmp/es6",
 }
 ```
 
@@ -93,10 +91,8 @@ Add to `package.json`:
 
 ```json
 "scripts": {
-  "server:lint:js": "eslint src/server/**/*.js",
-  "server:babel": "babel build/.tmp/server/es6 --source-maps --out-dir build/.tmp/server/es5",
-  "client:lint:js": "eslint src/client/**/*.js",
-  "client:babel": "babel build/.tmp/client/es6 --source-maps --out-dir build/.tmp/client/es5",
+  "lint:eslint": "eslint src",
+  "build:babel": "babel build/.tmp/es6 --source-maps --out-dir build/.tmp/es5",
 }
 ```
 
@@ -107,7 +103,7 @@ Install Browserify and UglifyJS:
 
 ```sh
 npm install --save-dev browserify exorcist
-npm install --save-dev uglifyjs
+npm install --save-dev uglify-js
 ```
 
 - `exorcist` gets the Source Map from Browserify stream 
@@ -116,8 +112,8 @@ Add to `package.json`:
 
 ```json
 "scripts": {
-  "client:browserify": "browserify build/.tmp/client/es5/client/app.js --debug | exorcist build/.tmp/client/bundle.js.map --base build/.tmp/client > build/.tmp/client/bundle.js",
-  "client:uglify": "uglifyjs build/.tmp/client/bundle.js --compress --mangle --source-map build/.tmp/client/bundle.min.js.map --prefix relative --output build/.tmp/client/bundle.min.js",
+  "build:browserify": "browserify build/.tmp/es5/app.js --debug | exorcist build/bundle.js.map --base build > build/bundle.js",
+  "build:uglify": "uglifyjs build/bundle.js --compress --mangle --source-map build/bundle.min.js.map --prefix relative --output build/bundle.min.js",
 }
 ```
 
@@ -134,8 +130,7 @@ Add to `package.json`:
 
 ```json
 "scripts": {
-  "server:sorcery": "sorcery --input build/.tmp/server/es5 --output build/server-dist",
-  "client:sorcery": "sorcery --input build/.tmp/client/bundle.min.js --output build/client-dist/bundle.min.js",
+  "build:sorcery": "sorcery --input build/bundle.min.js",
 }
 ```
 
@@ -152,7 +147,7 @@ Add `--require source-map-support/register` to node arguments:
 
 ```json
 "scripts": {
-  "server:start": "node --require source-map-support/register build/server-dist/server/app.js",
+  "start": "node --require source-map-support/register build/app.js",
 }
 ```
 
@@ -178,46 +173,54 @@ npm install --save-dev rimraf
 `package.json`:
 
 ```json
-  "scripts": {
-    "clean": "rimraf build",
-    "server:build": "npm-run-all --parallel server:lint:* server:mocha --sequential server:tsc server:babel server:sorcery",
-    "server:watch": "nodemon --watch src/server --ext ts,js --exec 'npm-run-all --sequential server:build server:start'",
-    "client:build": "npm-run-all --parallel client:lint:* client:mocha --sequential client:tsc client:babel client:browserify client:uglify client:sorcery client:copy",
-    "client:watch": "nodemon --watch src/client --ext ts,js,html --exec 'npm-run-all --sequential client:build client:start'",
-    "build": "npm-run-all --parallel server:build client:build",
-    "watch": "nodemon --watch src --ext ts,js --exec 'npm-run-all --sequential build start'"
+"scripts": {
+  "lint": "npm-run-all --parallel lint:eslint lint:tslint",
+  "build": "npm-run-all --sequential build:tsc build:babel build:browserify build:uglify build:sorcery build:html",
+  "watch": "nodemon --watch src --ext ts,js --exec 'npm-run-all --parallel test lint --sequential clean build start'"
   }
 ```
 
-## Finally
+Finally
+-------
 
 `package.json` looks like:
 
+### Node-side
+
 ```json
   "scripts": {
+    "test": "mocha --require ts-node/register --recursive test/**/*.test.ts",
     "clean": "rimraf build",
-    "server:lint:ts": "tslint src/server/**/*.ts",
-    "server:lint:js": "eslint src/server/**/*.js",
-    "server:mocha": "mocha --require ts-node/register test/*.test.ts",
-    "server:tsc": "tsc --project src/server --rootDir src --sourceMap --outDir build/.tmp/server/es6",
-    "server:babel": "babel build/.tmp/server/es6 --source-maps --out-dir build/.tmp/server/es5",
-    "server:sorcery": "sorcery --input build/.tmp/server/es5 --output build/server-dist",
-    "server:start": "node --require source-map-support/register build/server-dist/server/app.js",
-    "server:build": "npm-run-all --parallel server:lint:* server:mocha --sequential server:tsc server:babel server:sorcery",
-    "server:watch": "nodemon --watch src/server --ext ts,js --exec 'npm-run-all --sequential server:build server:start'",
-    "client:lint:ts": "tslint src/client/**/*.ts",
-    "client:lint:js": "eslint src/client/**/*.js",
-    "client:mocha": "mocha --require ts-node/register test/*.test.ts",
-    "client:tsc": "tsc --project src/client --rootDir src --sourceMap --outDir build/.tmp/client/es6",
-    "client:babel": "babel build/.tmp/client/es6 --source-maps --out-dir build/.tmp/client/es5",
-    "client:browserify": "browserify build/.tmp/client/es5/client/app.js --debug | exorcist build/.tmp/client/bundle.js.map --base build/.tmp/client > build/.tmp/client/bundle.js",
-    "client:uglify": "uglifyjs build/.tmp/client/bundle.js --compress --mangle --source-map build/.tmp/client/bundle.min.js.map --prefix relative --output build/.tmp/client/bundle.min.js",
-    "client:sorcery": "sorcery --input build/.tmp/client/bundle.min.js --output build/client-dist/bundle.min.js",
-    "client:copy": "cp src/client/public/*.html build/client-dist",
-    "client:start": "http-server build/client-dist",
-    "client:build": "npm-run-all --parallel client:lint:* client:mocha --sequential client:tsc client:babel client:browserify client:uglify client:sorcery client:copy",
-    "client:watch": "nodemon --watch src/client --ext ts,js,html --exec 'npm-run-all --sequential client:build client:start'",
-    "build": "npm-run-all --parallel server:build client:build",
-    "watch": "npm-run-all --parallel server:watch client:watch"
+    "lint:eslint": "eslint src",
+    "lint:tslint": "tslint $(find src -name '*.ts')",
+    "lint": "npm-run-all --parallel lint:eslint lint:tslint",
+    "build:tsc": "tsc --rootDir src --sourceMap --outDir build/.tmp/es6",
+    "build:babel": "babel build/.tmp/es6 --source-maps --out-dir build/.tmp/es5",
+    "build:sorcery": "sorcery --input build/.tmp/es5 --output build",
+    "build": "npm-run-all --sequential build:tsc build:babel build:sorcery",
+    "postbuild": "rimraf build/.tmp",
+    "start": "node --require source-map-support/register build/app.js",
+    "watch": "nodemon --watch src --ext ts,js --exec 'npm-run-all --parallel test lint --sequential clean build start'"
+  }
+```
+
+### Browser-side
+
+```json
+  "scripts": {
+    "test": "mocha --require ts-node/register --recursive test/**/*.test.ts",
+    "clean": "rimraf build",
+    "lint:eslint": "eslint src",
+    "lint:tslint": "tslint $(find src -name '*.ts')",
+    "lint": "npm-run-all --parallel lint:eslint lint:tslint",
+    "build:tsc": "tsc --rootDir src --sourceMap --outDir build/.tmp/es6",
+    "build:babel": "babel build/.tmp/es6 --source-maps --out-dir build/.tmp/es5",
+    "build:browserify": "browserify build/.tmp/es5/app.js --debug | exorcist build/bundle.js.map --base build > build/bundle.js",
+    "build:uglify": "uglifyjs build/bundle.js --compress --mangle --source-map build/bundle.min.js.map --prefix relative --output build/bundle.min.js",
+    "build:sorcery": "sorcery --input build/bundle.min.js",
+    "build:html": "mkdir -p build && cp -r src/public/* build",
+    "build": "npm-run-all --sequential build:tsc build:babel build:browserify build:uglify build:sorcery build:html",
+    "start": "http-server -p 8080 build",
+    "watch": "nodemon --watch src --ext ts,js --exec 'npm-run-all --parallel test lint --sequential clean build'"
   }
 ```

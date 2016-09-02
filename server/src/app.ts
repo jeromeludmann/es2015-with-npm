@@ -5,7 +5,8 @@ console.log(ex.capitalize());
 
 // Usage of ES5 JavaScript
 // (requires TypeScript compiler option "allowJs" set to true)
-import * as ThirdPartyES5 from "./third-party/ThirdPartyES5.js";
+// (requires type definition file)
+import ThirdPartyES5 = require("./third-party/ThirdPartyES5.js");
 let es5 = new ThirdPartyES5("Usage of third-party ES5 JavaScript");
 console.log(es5.getValue());
 
@@ -25,4 +26,4 @@ async function es7() {
 es7();
 
 // Checking Source Map support
-es5.throwException();
+// es5.throwException();
