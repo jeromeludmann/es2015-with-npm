@@ -1,5 +1,8 @@
-.message {
+p {
+    font-size: 1.4em;
+}
+
+strong {
     color: red;
-    font-size: 2em;
     font-weight: bold;
 }
