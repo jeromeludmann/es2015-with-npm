@@ -29,7 +29,8 @@ Configure `tsconfig.json`:
   },
   "exclude": [
     "node_modules",
-    "build"
+    "build",
+    "test"
   ]
 }
 ```
@@ -44,7 +45,7 @@ Add to `package.json`:
 
 ```json
 "scripts": {
-  "lint:tslint": "tslint $(find src -name '*.ts')",
+  "lint:tslint": "tslint $(find src test -name '*.ts')",
   "build:tsc": "tsc --rootDir src --sourceMap --outDir build/.tmp/es6",
 }
 ```
@@ -91,13 +92,13 @@ Add to `package.json`:
 
 ```json
 "scripts": {
-  "lint:eslint": "eslint src",
+  "lint:eslint": "eslint src test",
   "build:babel": "babel build/.tmp/es6 --source-maps --out-dir build/.tmp/es5",
 }
 ```
 
-Bundling dependencies (browser-side)
-------------------------------------
+Bundling dependencies (client side)
+-----------------------------------
 
 Install Browserify and UglifyJS:
 
@@ -116,6 +117,28 @@ Add to `package.json`:
   "build:uglify": "uglifyjs build/bundle.js --compress --mangle --source-map build/bundle.min.js.map --prefix relative --output build/bundle.min.js",
 }
 ```
+
+Test-Driven Development
+-----------------------
+
+Install dependencies:
+
+```sh
+npm install --save-dev mocha
+npm install --save-dev chai
+```
+
+- `chai` is an assertion library for TDD/BDD
+
+Add to `package.json`:
+
+```json
+"scripts": {
+  "test": "mocha --require ts-node/register --recursive test/**/*.test.ts",
+}
+```
+
+- argument `--require ts-node/register` compiles TypeScript on the fly
 
 Multi-level Source Map
 ----------------------
@@ -137,7 +160,9 @@ Add to `package.json`:
 Source Map support
 ------------------
 
-### Node-side support
+**Server side**
+
+Get `source-map-support`:
 
 ```sh
 npm install --save source-map-support
@@ -151,9 +176,23 @@ Add `--require source-map-support/register` to node arguments:
 }
 ```
 
-### Browser-side support
+**Client side**
 
-Open _Developer Tools_ from browser menu. 
+Just install:
+
+```sh
+npm install --save-dev live-server
+``` 
+
+Add to `package.json`:
+
+```json
+"scripts": {
+  "start": "live-server build",
+}
+``` 
+
+and open **Developer Tools** from browser menu. 
 
 Make these things work together
 -------------------------------
@@ -170,14 +209,18 @@ npm install --save-dev rimraf
 - `nodemon` monitors for any changes (like `gulp.watch()`)
 - `rimraf` is a cross-platform `rm -rf`
 
-`package.json`:
+Add to `package.json`:
 
 ```json
 "scripts": {
   "lint": "npm-run-all --parallel lint:eslint lint:tslint",
-  "build": "npm-run-all --sequential build:tsc build:babel build:browserify build:uglify build:sorcery build:html",
-  "watch": "nodemon --watch src --ext ts,js --exec 'npm-run-all --parallel test lint --sequential clean build start'"
-  }
+  "build": "npm-run-all --sequential build:tsc build:babel build:browserify build:uglify build:sorcery",
+  "watch:test": "nodemon --watch test --ext ts,js --exec 'npm-run-all --parallel lint test'",
+  "watch:build": "nodemon --watch src --ext ts,js --exec 'npm-run-all --parallel lint test --sequential build'",
+  "watch:copy": "nodemon --watch src --ext html,css --exec 'npm run copy'",
+  "watch:start": "nodemon --watch build --ext js,html,css --exec 'npm run start'",
+  "watch": "npm-run-all --parallel watch:*"  
+}
 ```
 
 Finally
@@ -185,42 +228,98 @@ Finally
 
 `package.json` looks like:
 
-### Node-side
+**Server side**
 
 ```json
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "npm workflow for back-end development",
   "scripts": {
+    "lint:eslint": "eslint src test",
+    "lint:tslint": "tslint $(find src test -name '*.ts')",
+    "lint": "npm-run-all --parallel lint:eslint lint:tslint",
     "test": "mocha --require ts-node/register --recursive test/**/*.test.ts",
     "clean": "rimraf build",
-    "lint:eslint": "eslint src",
-    "lint:tslint": "tslint $(find src -name '*.ts')",
-    "lint": "npm-run-all --parallel lint:eslint lint:tslint",
     "build:tsc": "tsc --rootDir src --sourceMap --outDir build/.tmp/es6",
     "build:babel": "babel build/.tmp/es6 --source-maps --out-dir build/.tmp/es5",
     "build:sorcery": "sorcery --input build/.tmp/es5 --output build",
     "build": "npm-run-all --sequential build:tsc build:babel build:sorcery",
     "postbuild": "rimraf build/.tmp",
     "start": "node --require source-map-support/register build/app.js",
-    "watch": "nodemon --watch src --ext ts,js --exec 'npm-run-all --parallel test lint --sequential clean build start'"
+    "watch:test": "nodemon --watch test --ext ts,js --exec 'npm-run-all --parallel lint test'",
+    "watch:build": "nodemon --watch src --ext ts,js --exec 'npm-run-all --parallel lint test --sequential build'",
+    "watch:start": "nodemon --watch build --ext js --exec 'npm run start'",
+    "prewatch": "npm run clean",
+    "watch": "npm-run-all --parallel watch:*"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.14.0",
+    "babel-plugin-transform-runtime": "^6.15.0",
+    "babel-preset-es2015": "^6.14.0",
+    "eslint": "^3.4.0",
+    "mocha": "^3.0.2",
+    "nodemon": "^1.10.2",
+    "npm-run-all": "^3.1.0",
+    "rimraf": "^2.5.4",
+    "sorcery": "^0.10.0",
+    "ts-node": "^1.3.0",
+    "tslint": "^3.15.1",
+    "typescript": "^1.8.10"
+  },
+  "dependencies": {
+    "source-map-support": "^0.4.2"
   }
+}
 ```
 
-### Browser-side
+**Client side**
 
 ```json
+{
+  "name": "client",
+  "version": "1.0.0",
+  "description": "npm workflow for front-end development",
   "scripts": {
+    "lint:eslint": "eslint src test",
+    "lint:tslint": "tslint $(find src test -name '*.ts')",
+    "lint": "npm-run-all --parallel lint:*",
     "test": "mocha --require ts-node/register --recursive test/**/*.test.ts",
     "clean": "rimraf build",
-    "lint:eslint": "eslint src",
-    "lint:tslint": "tslint $(find src -name '*.ts')",
-    "lint": "npm-run-all --parallel lint:eslint lint:tslint",
+    "copy": "mkdir -p build && cp -r src/public/* build",
     "build:tsc": "tsc --rootDir src --sourceMap --outDir build/.tmp/es6",
     "build:babel": "babel build/.tmp/es6 --source-maps --out-dir build/.tmp/es5",
     "build:browserify": "browserify build/.tmp/es5/app.js --debug | exorcist build/bundle.js.map --base build > build/bundle.js",
     "build:uglify": "uglifyjs build/bundle.js --compress --mangle --source-map build/bundle.min.js.map --prefix relative --output build/bundle.min.js",
     "build:sorcery": "sorcery --input build/bundle.min.js",
-    "build:html": "mkdir -p build && cp -r src/public/* build",
-    "build": "npm-run-all --sequential build:tsc build:babel build:browserify build:uglify build:sorcery build:html",
-    "start": "http-server -p 8080 build",
-    "watch": "nodemon --watch src --ext ts,js --exec 'npm-run-all --parallel test lint --sequential clean build'"
+    "build": "npm-run-all --sequential build:tsc build:babel build:browserify build:uglify build:sorcery",
+    "postbuild": "rimraf build/.tmp",
+    "start": "live-server build",
+    "watch:test": "nodemon --watch test --ext ts,js --exec 'npm-run-all --parallel lint test'",
+    "watch:build": "nodemon --watch src --ext ts,js --exec 'npm-run-all --parallel lint test --sequential build'",
+    "watch:copy": "nodemon --watch src --ext html,css --exec 'npm run copy'",
+    "watch:start": "nodemon --watch build --ext js,html,css --exec 'npm run start'",
+    "prewatch": "npm run clean",
+    "watch": "npm-run-all --parallel watch:*"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.14.0",
+    "babel-plugin-transform-runtime": "^6.15.0",
+    "babel-preset-es2015": "^6.14.0",
+    "browserify": "^13.1.0",
+    "eslint": "^3.4.0",
+    "exorcist": "^0.4.0",
+    "live-server": "^1.1.0",
+    "livereload": "^0.5.0",
+    "mocha": "^3.0.2",
+    "nodemon": "^1.10.2",
+    "npm-run-all": "^3.1.0",
+    "rimraf": "^2.5.4",
+    "sorcery": "^0.10.0",
+    "ts-node": "^1.3.0",
+    "tslint": "^3.15.1",
+    "typescript": "^1.8.10",
+    "uglify-js": "^2.7.3"
   }
+}
 ```
