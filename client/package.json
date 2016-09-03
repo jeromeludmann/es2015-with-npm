@@ -18,9 +18,9 @@
     "build": "npm-run-all --sequential build:tsc build:babel build:browserify build:uglify build:sorcery",
     "postbuild": "rimraf build/.tmp",
     "start": "live-server build",
-    "watch:test": "nodemon --watch test --watch src --ext ts,js --exec 'npm-run-all --sequential lint test'",
-    "watch:build": "nodemon --watch src --ext ts,js --exec 'npm-run-all --sequential build'",
-    "watch:copy": "nodemon --watch src --ext html,css --exec 'npm-run-all --sequential copy'",
+    "watch:test": "nodemon --watch test --ext ts,js --exec 'npm-run-all --parallel lint test'",
+    "watch:build": "nodemon --watch src --ext ts,js --exec 'npm-run-all --parallel lint test --sequential build'",
+    "watch:copy": "nodemon --watch src --ext html,css --exec 'npm run copy'",
     "watch:start": "nodemon --watch build --ext js,html,css --exec 'npm run start'",
     "prewatch": "npm run clean",
     "watch": "npm-run-all --parallel watch:*"

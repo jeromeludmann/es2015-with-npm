@@ -1,5 +1,10 @@
+body {
+    background-color: beige;
+}
+
 p {
     font-size: 1.4em;
+    font-family: Menlo;
 }
 
 strong {
