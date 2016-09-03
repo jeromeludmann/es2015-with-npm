@@ -6,8 +6,8 @@ declare function it(name: string, fn: any): any;
 
 const assert = require("assert");
 
-describe('ExampleImpl', function () {
-    it('should capitalize \"test\"', function () {
+describe("ExampleImpl", function () {
+    it("should capitalize \"test\"", function () {
         const example = new ExampleImpl("test");
         return assert(example.capitalize() === "TEST");
     });
