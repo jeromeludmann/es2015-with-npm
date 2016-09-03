@@ -2,7 +2,6 @@
   "name": "server",
   "version": "1.0.0",
   "description": "npm workflow for back-end development",
-  "main": "index.js",
   "scripts": {
     "lint:eslint": "eslint src test",
     "lint:tslint": "tslint $(find src test -name '*.ts')",
@@ -21,9 +20,6 @@
     "prewatch": "npm run clean",
     "watch": "npm-run-all --parallel watch:*"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "devDependencies": {
     "babel-cli": "^6.14.0",
     "babel-plugin-transform-runtime": "^6.15.0",
