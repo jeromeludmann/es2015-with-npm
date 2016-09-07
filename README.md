@@ -203,11 +203,13 @@ Install command-line tools:
 npm install --save-dev npm-run-all
 npm install --save-dev nodemon
 npm install --save-dev rimraf
+npm install --save-dev mkdirp
 ```
 
 - `npm-run-all` runs multiple scripts in parallel or sequential
 - `nodemon` monitors for any changes (like `gulp.watch()`)
 - `rimraf` is a cross-platform `rm -rf`
+- `mkdirp` is a cross-platform `mkdir -p`
 
 Add to `package.json`:
 
@@ -286,7 +288,7 @@ Finally
     "lint": "npm-run-all --parallel lint:*",
     "test": "mocha --require ts-node/register --recursive test/**/*.test.ts",
     "clean": "rimraf build",
-    "copy": "mkdir -p build && cp -r src/public/* build",
+    "copy": "mkdirp build && cp -r src/public/* build",
     "build:tsc": "tsc --rootDir src --sourceMap --outDir build/.tmp/es6",
     "build:babel": "babel build/.tmp/es6 --source-maps --out-dir build/.tmp/es5",
     "build:browserify": "browserify build/.tmp/es5/app.js --debug | exorcist build/bundle.js.map --base build > build/bundle.js",
