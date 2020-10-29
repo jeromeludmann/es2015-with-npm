@@ -1,10 +1,10 @@
-npm-workflow
-============
+# npm-workflow
+
+> **DEPRECATED: Do not follow what is written below. There are a lot of tools today to do that in a good way.**
 
 Below is a TypeScript-oriented build workflow using `npm`, without Grunt or Gulp, for front and back-end JavaScript development.
 
-TypeScript as a superset of JavaScript
---------------------------------------
+## TypeScript as a superset of JavaScript
 
 Install TypeScript compiler and linter:
 
@@ -27,11 +27,7 @@ Configure `tsconfig.json`:
     "pretty": true,
     "allowJs": true
   },
-  "exclude": [
-    "node_modules",
-    "build",
-    "test"
-  ]
+  "exclude": ["node_modules", "build", "test"]
 }
 ```
 
@@ -50,8 +46,7 @@ Add to `package.json`:
 }
 ```
 
-ES2015 (ES6) to ES5 JavaScript
-------------------------------
+## ES2015 (ES6) to ES5 JavaScript
 
 Install Babel and ESLint:
 
@@ -67,9 +62,7 @@ Add to `.babelrc`:
 
 ```json
 {
-  "presets": [
-    "es2015"
-  ],
+  "presets": ["es2015"],
   "plugins": [
     [
       "transform-runtime",
@@ -97,8 +90,7 @@ Add to `package.json`:
 }
 ```
 
-Bundling dependencies (client side)
------------------------------------
+## Bundling dependencies (client side)
 
 Install Browserify and UglifyJS:
 
@@ -107,7 +99,7 @@ npm install --save-dev browserify exorcist
 npm install --save-dev uglify-js
 ```
 
-- `exorcist` gets the Source Map from Browserify stream 
+- `exorcist` gets the Source Map from Browserify stream
 
 Add to `package.json`:
 
@@ -118,8 +110,7 @@ Add to `package.json`:
 }
 ```
 
-Test-Driven Development
------------------------
+## Test-Driven Development
 
 Install dependencies:
 
@@ -140,8 +131,7 @@ Add to `package.json`:
 
 - argument `--require ts-node/register` compiles TypeScript on the fly
 
-Multi-level Source Map
-----------------------
+## Multi-level Source Map
 
 ```sh
 npm install --save-dev sorcery
@@ -157,8 +147,7 @@ Add to `package.json`:
 }
 ```
 
-Source Map support
-------------------
+## Source Map support
 
 **Server side**
 
@@ -182,7 +171,7 @@ Just install:
 
 ```sh
 npm install --save-dev live-server
-``` 
+```
 
 Add to `package.json`:
 
@@ -190,12 +179,11 @@ Add to `package.json`:
 "scripts": {
   "start": "live-server build",
 }
-``` 
+```
 
-and open **Developer Tools** from browser menu. 
+and open **Developer Tools** from browser menu.
 
-Make these things work together
--------------------------------
+## Make these things work together
 
 Install command-line tools:
 
@@ -221,12 +209,11 @@ Add to `package.json`:
   "watch:build": "nodemon --watch src --ext ts,js --exec 'npm-run-all --parallel lint test --sequential build'",
   "watch:copy": "nodemon --watch src --ext html,css --exec 'npm run copy'",
   "watch:start": "nodemon --watch build --ext js,html,css --exec 'npm run start'",
-  "watch": "npm-run-all --parallel watch:*"  
+  "watch": "npm-run-all --parallel watch:*"
 }
 ```
 
-Finally
--------
+## Finally
 
 `package.json` looks like:
 
